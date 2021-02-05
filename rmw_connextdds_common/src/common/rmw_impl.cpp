@@ -1780,10 +1780,11 @@ RMW_Connext_Subscriber::create(
 
   DDS_TopicDescription * sub_topic = DDS_Topic_as_topicdescription(topic);
 
-  if (nullptr != cft_name) {
+  if (nullptr != subscriber_options->filter_expression) {
     rmw_ret_t cft_rc =
       rmw_connextdds_create_contentfilteredtopic(
-      ctx, dp, topic, cft_name, cft_filter, &cft_topic);
+      ctx, dp, topic, "ContentFilterTopic",
+      subscriber_options->filter_expression, subscriber_options->expression_parameters, &cft_topic);
 
     if (RMW_RET_OK != cft_rc) {
       if (RMW_RET_UNSUPPORTED != cft_rc) {
