@@ -246,6 +246,7 @@ rmw_connextdds_create_contentfilteredtopic(
   DDS_Topic * const base_topic,
   const char * const cft_name,
   const char * const cft_filter,
+  rcutils_string_array_t * cft_expression_parameters,
   DDS_TopicDescription ** const cft_out)
 {
   UNUSED_ARG(ctx);
@@ -253,8 +254,13 @@ rmw_connextdds_create_contentfilteredtopic(
   RMW_CONNEXT_ASSERT(nullptr != cft_filter)
 
   struct DDS_StringSeq cft_parameters;
-  DDS_StringSeq_initialize(&cft_parameters);
-  DDS_StringSeq_ensure_length(&cft_parameters, 0, 0);
+  if (cft_expression_parameters) {
+    DDS_StringSeq_initialize(&cft_parameters);
+    DDS_StringSeq_ensure_length(&cft_parameters, cft_expression_parameters->size, cft_expression_parameters->size);
+    DDS_StringSeq_from_array(&cft_parameters,
+      const_cast<const char **>(cft_expression_parameters->data),
+      cft_expression_parameters->size);
+  }
 
   *cft_out = nullptr;
 
