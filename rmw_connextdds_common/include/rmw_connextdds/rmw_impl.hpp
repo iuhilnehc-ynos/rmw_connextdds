@@ -953,6 +953,18 @@ public:
     bool * const taken);
 
   rmw_ret_t
+  set_cft_expression_parameters(
+    const char * filter_expression,
+    const rcutils_string_array_t * expression_parameters
+  );
+
+  rmw_ret_t
+  get_cft_expression_parameters(
+    char ** filter_expression,
+    rcutils_string_array_t * expression_parameters
+  );
+
+  rmw_ret_t
   liveliness_changed_status(rmw_liveliness_changed_status_t * const status);
 
   rmw_ret_t

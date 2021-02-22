@@ -2093,6 +2093,100 @@ RMW_Connext_Subscriber::take_serialized(
   return rc;
 }
 
+rmw_ret_t
+RMW_Connext_Subscriber::set_cft_expression_parameters(
+  const char * filter_expression,
+  const rcutils_string_array_t * expression_parameters)
+{
+  DDS_ContentFilteredTopic * const cft_topic =
+    DDS_ContentFilteredTopic_narrow(dds_topic_cft);
+
+  struct DDS_StringSeq cft_parameters;
+  if (expression_parameters) {
+    DDS_StringSeq_initialize(&cft_parameters);
+    DDS_StringSeq_ensure_length(&cft_parameters, expression_parameters->size, expression_parameters->size);
+    DDS_StringSeq_from_array(&cft_parameters,
+      const_cast<const char **>(expression_parameters->data),
+      expression_parameters->size);
+  }
+
+  if (DDS_RETCODE_OK !=
+    DDS_ContentFilteredTopic_set_expression(cft_topic, filter_expression, &cft_parameters))
+  {
+    RMW_CONNEXT_LOG_ERROR("failed to set content-filtered topic")
+    return RMW_RET_ERROR;
+  }
+
+  return RMW_RET_OK;
+}
+
+rmw_ret_t
+RMW_Connext_Subscriber::get_cft_expression_parameters(
+  char ** filter_expression,
+  rcutils_string_array_t * expression_parameters)
+{
+  DDS_ContentFilteredTopic * const cft_topic =
+    DDS_ContentFilteredTopic_narrow(dds_topic_cft);
+
+  rmw_ret_t ret;
+  rcutils_ret_t rcutils_ret;
+  int parameters_len;
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+
+  // get filter_expression
+  const char* expression = DDS_ContentFilteredTopic_get_filter_expression(cft_topic);
+  if (!expression) {
+    RMW_SET_ERROR_MSG("failed to get filter expression");
+    return RMW_RET_ERROR;
+  }
+
+  *filter_expression = rcutils_strdup(expression, allocator);
+  if (NULL == *filter_expression) {
+    RMW_SET_ERROR_MSG("failed to duplicate string");
+    return RMW_RET_BAD_ALLOC;
+  }
+
+  // get parameters
+  DDS_StringSeq parameters;
+  DDS_ReturnCode_t status = DDS_ContentFilteredTopic_get_expression_parameters(cft_topic, &parameters);
+  if (DDS_RETCODE_OK != status) {
+    RMW_SET_ERROR_MSG("failed to get expression parameters");
+    ret = RMW_RET_ERROR;
+    goto clean;
+  }
+
+  parameters_len = DDS_StringSeq_get_length(&parameters);
+  rcutils_ret = rcutils_string_array_init(expression_parameters, parameters_len, &allocator);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    RMW_SET_ERROR_MSG("failed to init string array for expression parameters");
+    ret = RMW_RET_ERROR;
+    goto clean;
+  }
+  for (int i = 0; i < parameters_len; ++i) {
+    char * parameter = rcutils_strdup(DDS_StringSeq_get(&parameters, i), allocator);
+    if (!parameter) {
+      RMW_SET_ERROR_MSG("failed to allocate memory for parameter");
+      ret = RMW_RET_BAD_ALLOC;
+      goto clean;
+    }
+    expression_parameters->data[i] = parameter;
+  }
+
+  return RMW_RET_OK;
+
+clean:
+
+  if (*filter_expression) {
+    allocator.deallocate(*filter_expression, allocator.state);
+    *filter_expression = nullptr;
+  }
+
+  if (RCUTILS_RET_OK != rcutils_string_array_fini(expression_parameters)) {
+    RCUTILS_LOG_ERROR("Error while finalizing expression parameter due to another error");
+  }
+  return ret;
+}
+
 bool
 RMW_Connext_Subscriber::has_status(const DDS_StatusMask status_mask)
 {
