@@ -182,12 +182,20 @@ rmw_api_connextdds_subscription_set_cft_expression_parameters(
   const char * filter_expression,
   const rcutils_string_array_t * expression_parameters)
 {
-  // Unused in current implementation.
-  (void) subscription;
-  (void) filter_expression;
-  (void) expression_parameters;
-  RMW_SET_ERROR_MSG("TODO");
-  return RMW_RET_UNSUPPORTED;
+  RMW_CHECK_ARGUMENT_FOR_NULL(subscription, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    subscription,
+    subscription->implementation_identifier,
+    RMW_CONNEXTDDS_ID,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  RMW_CHECK_ARGUMENT_FOR_NULL(filter_expression, RMW_RET_INVALID_ARGUMENT);
+
+  RMW_Connext_Subscriber * const sub_impl =
+    reinterpret_cast<RMW_Connext_Subscriber *>(subscription->data);
+
+  rmw_ret_t rc = sub_impl->set_cft_expression_parameters(filter_expression, expression_parameters);
+
+  return rc;
 }
 
 
@@ -197,12 +205,21 @@ rmw_api_connextdds_subscription_get_cft_expression_parameters(
   char ** filter_expression,
   rcutils_string_array_t * expression_parameters)
 {
-  // Unused in current implementation.
-  (void) subscription;
-  (void) filter_expression;
-  (void) expression_parameters;
-  RMW_SET_ERROR_MSG("TODO");
-  return RMW_RET_UNSUPPORTED;
+  RMW_CHECK_ARGUMENT_FOR_NULL(subscription, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    subscription,
+    subscription->implementation_identifier,
+    RMW_CONNEXTDDS_ID,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  RMW_CHECK_ARGUMENT_FOR_NULL(filter_expression, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(expression_parameters, RMW_RET_INVALID_ARGUMENT);
+
+  RMW_Connext_Subscriber * const sub_impl =
+    reinterpret_cast<RMW_Connext_Subscriber *>(subscription->data);
+
+  rmw_ret_t rc = sub_impl->get_cft_expression_parameters(filter_expression, expression_parameters);
+
+  return rc;
 }
 
 

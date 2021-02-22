@@ -1029,6 +1029,18 @@ public:
     rmw_message_info_t * const message_info,
     bool * const taken);
 
+  rmw_ret_t
+  set_cft_expression_parameters(
+    const char * filter_expression,
+    const rcutils_string_array_t * expression_parameters
+  );
+
+  rmw_ret_t
+  get_cft_expression_parameters(
+    char ** filter_expression,
+    rcutils_string_array_t * expression_parameters
+  );
+
   bool
   has_data()
   {
