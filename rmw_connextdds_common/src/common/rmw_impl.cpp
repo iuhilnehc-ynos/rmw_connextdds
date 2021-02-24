@@ -1753,7 +1753,8 @@ RMW_Connext_Subscriber::create(
     rmw_ret_t cft_rc =
       rmw_connextdds_create_contentfilteredtopic(
       ctx, dp, topic, "ContentFilterTopic",
-      subscriber_options->filter_expression, subscriber_options->expression_parameters, &cft_topic);
+      subscriber_options->filter_expression,
+      subscriber_options->expression_parameters, &cft_topic);
 
     if (RMW_RET_OK != cft_rc) {
       if (RMW_RET_UNSUPPORTED != cft_rc) {
@@ -2041,16 +2042,19 @@ RMW_Connext_Subscriber::set_cft_expression_parameters(
     DDS_ContentFilteredTopic_narrow(dds_topic_cft);
 
   struct DDS_StringSeq cft_parameters;
+  DDS_StringSeq_initialize(&cft_parameters);
   if (expression_parameters) {
-    DDS_StringSeq_initialize(&cft_parameters);
-    DDS_StringSeq_ensure_length(&cft_parameters, expression_parameters->size, expression_parameters->size);
+    DDS_StringSeq_ensure_length(
+      &cft_parameters, expression_parameters->size, expression_parameters->size);
     DDS_StringSeq_from_array(&cft_parameters,
       const_cast<const char **>(expression_parameters->data),
       expression_parameters->size);
   }
 
-  if (DDS_RETCODE_OK !=
-    DDS_ContentFilteredTopic_set_expression(cft_topic, filter_expression, &cft_parameters))
+  DDS_ReturnCode_t ret =
+    DDS_ContentFilteredTopic_set_expression(cft_topic, filter_expression, &cft_parameters);
+  DDS_StringSeq_finalize(&cft_parameters);
+  if (DDS_RETCODE_OK != ret)
   {
     RMW_CONNEXT_LOG_ERROR("failed to set content-filtered topic")
     return RMW_RET_ERROR;
@@ -2087,7 +2091,8 @@ RMW_Connext_Subscriber::get_cft_expression_parameters(
 
   // get parameters
   DDS_StringSeq parameters;
-  DDS_ReturnCode_t status = DDS_ContentFilteredTopic_get_expression_parameters(cft_topic, &parameters);
+  DDS_ReturnCode_t status =
+    DDS_ContentFilteredTopic_get_expression_parameters(cft_topic, &parameters);
   if (DDS_RETCODE_OK != status) {
     RMW_SET_ERROR_MSG("failed to get expression parameters");
     ret = RMW_RET_ERROR;
