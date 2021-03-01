@@ -1748,11 +1748,11 @@ RMW_Connext_Subscriber::create(
     });
 
   DDS_TopicDescription * sub_topic = DDS_Topic_as_topicdescription(topic);
-
+  std::string cft_topic_name = fqtopic_name+"_ContentFilterTopic";
   if (nullptr != subscriber_options->filter_expression) {
     rmw_ret_t cft_rc =
       rmw_connextdds_create_contentfilteredtopic(
-      ctx, dp, topic, "ContentFilterTopic",
+      ctx, dp, topic, cft_topic_name.c_str(),
       subscriber_options->filter_expression,
       subscriber_options->expression_parameters, &cft_topic);
 
