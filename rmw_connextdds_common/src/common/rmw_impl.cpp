@@ -2067,7 +2067,7 @@ RMW_Connext_Subscriber::set_cft_expression_parameters(
     DDS_Subscriber_delete_datareader(this->dds_subscriber(), this->dds_reader))
     {
       RMW_CONNEXT_LOG_ERROR_SET(
-        "failed to delete DDS DataWriter")
+        "failed to delete DDS DataReader")
       return RMW_RET_ERROR;
     }
 
@@ -2173,7 +2173,7 @@ RMW_Connext_Subscriber::set_cft_expression_parameters(
       DDS_Subscriber_delete_datareader(this->dds_subscriber(), this->dds_reader))
       {
         RMW_CONNEXT_LOG_ERROR_SET(
-          "failed to delete DDS DataWriter")
+          "failed to delete DDS DataReader")
         return RMW_RET_ERROR;
       }
 
