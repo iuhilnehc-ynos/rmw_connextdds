@@ -2074,7 +2074,6 @@ RMW_Connext_Subscriber::set_cft_expression_parameters(
     // create cft topic and a new reader
     DDS_TopicDescription * cft_topic = nullptr;
     DDS_DomainParticipant * dp = this->dds_participant();
-    DDS_TopicDescription * sub_topic = DDS_Topic_as_topicdescription(dds_topic);
     std::string cft_topic_name = fqtopic_name+"_ContentFilterTopic";
 
     rmw_ret_t cft_rc =
@@ -2292,6 +2291,10 @@ RMW_Connext_Subscriber::get_cft_expression_parameters(
   char ** filter_expression,
   rcutils_string_array_t * expression_parameters)
 {
+  if (nullptr == this->dds_topic_cft) {
+    RMW_SET_ERROR_MSG("this subscriber has not created a contentfilteredtopic.");
+    return RMW_RET_ERROR;
+  }
   DDS_ContentFilteredTopic * const cft_topic =
     DDS_ContentFilteredTopic_narrow(dds_topic_cft);
 
