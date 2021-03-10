@@ -947,7 +947,7 @@ public:
   RMW_Connext_SubscriberStatusCondition *
   condition()
   {
-    return &this->status_condition;
+    return this->status_condition.get();
   }
 
   const rmw_gid_t * gid() const
@@ -1071,9 +1071,17 @@ public:
     return this->dds_topic;
   }
 
+  void set_node(const rmw_node_t * node)
+  {
+    this->node = node;
+  }
+
   const bool internal;
 
 private:
+  enum class TOPIC_TYPE {NORMAL, CFT};
+  rmw_ret_t reset_topic(TOPIC_TYPE type, const char * filter_expression, const rcutils_string_array_t * expression_parameters);
+
   rmw_context_impl_t * ctx;
   DDS_DataReader * dds_reader;
   DDS_Topic * dds_topic;
@@ -1081,12 +1089,19 @@ private:
   RMW_Connext_MessageTypeSupport * type_support;
   rmw_gid_t ros_gid;
   const bool created_topic;
-  RMW_Connext_SubscriberStatusCondition status_condition;
+  std::shared_ptr<RMW_Connext_SubscriberStatusCondition> status_condition;
   RMW_Connext_UntypedSampleSeq loan_data;
   DDS_SampleInfoSeq loan_info;
   size_t loan_len;
   size_t loan_next;
   std::mutex loan_mutex;
+  std::mutex cft_mutex;
+  const rmw_node_t * node;
+
+  // todo, add new members
+  std::string fqtopic_name;
+  rmw_qos_profile_t qos_policies;
+  bool ignore_local;
 
   RMW_Connext_Subscriber(
     rmw_context_impl_t * const ctx,

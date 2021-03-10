@@ -193,6 +193,13 @@ rmw_api_connextdds_subscription_set_cft_expression_parameters(
   RMW_Connext_Subscriber * const sub_impl =
     reinterpret_cast<RMW_Connext_Subscriber *>(subscription->data);
 
+  // // if not supported
+  // if (!subscription->is_cft_supported) {
+  //  // create cft topic based on exist parent topic
+  //   sub_impl->create_cft_topic();
+  //   return RMW_RET_OK;
+  // }
+
   rmw_ret_t rc = sub_impl->set_cft_expression_parameters(filter_expression, expression_parameters);
 
   return rc;

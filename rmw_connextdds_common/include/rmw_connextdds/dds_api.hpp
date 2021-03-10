@@ -73,7 +73,7 @@ rmw_connextdds_create_contentfilteredtopic(
   DDS_Topic * const base_topic,
   const char * const cft_name,
   const char * const cft_filter,
-  rcutils_string_array_t * cft_expression_parameters,
+  const rcutils_string_array_t * cft_expression_parameters,
   DDS_TopicDescription ** const cft_out);
 
 rmw_ret_t
