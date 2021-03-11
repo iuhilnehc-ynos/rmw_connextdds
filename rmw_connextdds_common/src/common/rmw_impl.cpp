@@ -1847,7 +1847,6 @@ RMW_Connext_Subscriber::create(
   rmw_sub_impl->fqtopic_name = fqtopic_name;
   rmw_sub_impl->qos_policies = *qos_policies;
 
-
   scope_exit_type_unregister.cancel();
   scope_exit_topic_delete.cancel();
   scope_exit_dds_reader_delete.cancel();
@@ -1976,7 +1975,6 @@ RMW_Connext_Subscriber::take_message(
   bool * const taken,
   const DDS_InstanceHandle_t * const request_writer_handle)
 {
-  // std::lock_guard<std::mutex> lock(this->cft_mutex);
   *taken = false;
   size_t taken_count = 0;
   void * ros_messages[1];
@@ -2381,7 +2379,6 @@ RMW_Connext_Subscriber::loan_messages()
     "[%s] loaned messages: %lu",
     this->type_support->type_name(), this->loan_len)
 
-  // TODO, mutex
   return this->status_condition->set_data_available(this->loan_len > 0);
 }
 
@@ -2404,7 +2401,6 @@ RMW_Connext_Subscriber::return_messages()
     rc_result = rc;
   }
 
-  // TODO, mutex
   rc = this->status_condition->set_data_available(false);
   if (RMW_RET_OK != rc) {
     rc_result = rc;

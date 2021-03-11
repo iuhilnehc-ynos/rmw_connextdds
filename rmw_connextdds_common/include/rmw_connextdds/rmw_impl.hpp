@@ -1097,8 +1097,6 @@ private:
   std::mutex loan_mutex;
   std::mutex cft_mutex;
   const rmw_node_t * node;
-
-  // todo, add new members
   std::string fqtopic_name;
   rmw_qos_profile_t qos_policies;
   bool ignore_local;
