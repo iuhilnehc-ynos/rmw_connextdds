@@ -178,7 +178,7 @@ rmw_api_connextdds_subscription_get_actual_qos(
 
 rmw_ret_t
 rmw_api_connextdds_subscription_set_cft_expression_parameters(
-  const rmw_subscription_t * subscription,
+  rmw_subscription_t * subscription,
   const char * filter_expression,
   const rcutils_string_array_t * expression_parameters)
 {
@@ -194,6 +194,7 @@ rmw_api_connextdds_subscription_set_cft_expression_parameters(
     reinterpret_cast<RMW_Connext_Subscriber *>(subscription->data);
 
   rmw_ret_t rc = sub_impl->set_cft_expression_parameters(filter_expression, expression_parameters);
+  subscription->is_cft_supported = sub_impl->is_cft_supported();
 
   return rc;
 }

@@ -1076,6 +1076,11 @@ public:
     this->node = node;
   }
 
+  bool is_cft_supported()
+  {
+    return nullptr != dds_topic_cft;
+  }
+
   const bool internal;
 
 private:
