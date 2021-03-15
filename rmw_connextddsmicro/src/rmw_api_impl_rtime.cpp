@@ -748,8 +748,7 @@ rmw_subscription_set_cft_expression_parameters(
   const char * filter_expression,
   const rcutils_string_array_t * expression_parameters)
 {
-  return rmw_api_connextdds_subscription_set_cft_expression_parameters(
-    subscription, filter_expression, expression_parameters);
+  return RMW_RET_UNSUPPORTED;
 }
 
 
@@ -759,8 +758,7 @@ rmw_subscription_get_cft_expression_parameters(
   char ** filter_expression,
   rcutils_string_array_t * expression_parameters)
 {
-  return rmw_api_connextdds_subscription_get_cft_expression_parameters(
-    subscription, filter_expression, expression_parameters);
+  return RMW_RET_UNSUPPORTED;
 }
 
 

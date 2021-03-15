@@ -1071,6 +1071,11 @@ public:
     return this->dds_topic;
   }
 
+  static std::string get_atomic_id() {
+    static std::atomic_uint64_t id;
+    return std::to_string(id++);
+  }
+
   void set_node(const rmw_node_t * node)
   {
     this->node = node;
@@ -1084,9 +1089,6 @@ public:
   const bool internal;
 
 private:
-  enum class TOPIC_TYPE {NORMAL, CFT};
-  rmw_ret_t reset_topic(TOPIC_TYPE type, const char * filter_expression, const rcutils_string_array_t * expression_parameters);
-
   rmw_context_impl_t * ctx;
   DDS_DataReader * dds_reader;
   DDS_Topic * dds_topic;

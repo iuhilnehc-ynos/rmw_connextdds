@@ -132,6 +132,8 @@ rmw_api_connextdds_take_event(
     }
 
     *taken = true;
+  } else {
+    RMW_CONNEXT_LOG_WARNING("condition was reset because of resetting cft")
   }
   return RMW_RET_OK;
 }
