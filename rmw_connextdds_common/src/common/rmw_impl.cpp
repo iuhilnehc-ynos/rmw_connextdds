@@ -2327,14 +2327,14 @@ RMW_Connext_Subscriber::return_messages()
     "[%s] return loaned messages: %lu",
     this->type_support->type_name(), this->loan_len)
 
-  this->loan_len = 0;
-  this->loan_next = 0;
-
   rmw_ret_t rc_result = RMW_RET_OK;
   rmw_ret_t rc = rmw_connextdds_return_samples(this);
   if (RMW_RET_OK != rc) {
     rc_result = rc;
   }
+
+  this->loan_len = 0;
+  this->loan_next = 0;
 
   rc = this->status_condition->set_data_available(false);
   if (RMW_RET_OK != rc) {
