@@ -2109,7 +2109,6 @@ RMW_Connext_Subscriber::set_cft_expression_parameters(
       "failed to delete DDS DataReader")
     return RMW_RET_ERROR;
   }
-  this->dds_reader = nullptr;
 
   DDS_DomainParticipant * const dp = this->dds_participant();
   DDS_TopicDescription * sub_topic = nullptr;
