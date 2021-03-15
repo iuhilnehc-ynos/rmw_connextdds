@@ -1884,7 +1884,7 @@ RMW_Connext_Subscriber::finalize()
     }
   }
 
-  if (DDS_RETCODE_OK !=
+  if (nullptr != this->dds_reader && DDS_RETCODE_OK !=
     DDS_Subscriber_delete_datareader(
       this->dds_subscriber(), this->dds_reader))
   {
@@ -2088,6 +2088,10 @@ RMW_Connext_Subscriber::set_cft_expression_parameters(
     }
   }
 
+  if (this->loan_len != 0) {
+    RMW_CONNEXT_LOG_ERROR("subscriber can't be reset because a message data loaned")
+    return RMW_RET_ERROR;
+  }
   if (RMW_RET_OK !=
     rmw_connextdds_graph_on_subscriber_deleted(
       ctx, node, this))
@@ -2105,6 +2109,7 @@ RMW_Connext_Subscriber::set_cft_expression_parameters(
       "failed to delete DDS DataReader")
     return RMW_RET_ERROR;
   }
+  this->dds_reader = nullptr;
 
   DDS_DomainParticipant * const dp = this->dds_participant();
   DDS_TopicDescription * sub_topic = nullptr;
