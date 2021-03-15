@@ -246,6 +246,7 @@ rmw_connextdds_create_contentfilteredtopic(
   DDS_Topic * const base_topic,
   const char * const cft_name,
   const char * const cft_filter,
+  const rcutils_string_array_t * cft_expression_parameters,
   DDS_TopicDescription ** const cft_out)
 {
   UNUSED_ARG(ctx);
@@ -254,13 +255,20 @@ rmw_connextdds_create_contentfilteredtopic(
 
   struct DDS_StringSeq cft_parameters;
   DDS_StringSeq_initialize(&cft_parameters);
-  DDS_StringSeq_ensure_length(&cft_parameters, 0, 0);
+  if (cft_expression_parameters) {
+    DDS_StringSeq_ensure_length(
+      &cft_parameters, cft_expression_parameters->size, cft_expression_parameters->size);
+    DDS_StringSeq_from_array(&cft_parameters,
+      const_cast<const char **>(cft_expression_parameters->data),
+      cft_expression_parameters->size);
+  }
 
   *cft_out = nullptr;
 
   DDS_ContentFilteredTopic * cft_topic =
     DDS_DomainParticipant_create_contentfilteredtopic(
     dp, cft_name, base_topic, cft_filter, &cft_parameters);
+  DDS_StringSeq_finalize(&cft_parameters);
   if (nullptr == cft_topic) {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to create content-filtered topic: "
