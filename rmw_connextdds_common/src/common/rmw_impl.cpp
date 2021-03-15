@@ -2230,8 +2230,6 @@ RMW_Connext_Subscriber::get_cft_expression_parameters(
   DDS_ContentFilteredTopic * const cft_topic =
     DDS_ContentFilteredTopic_narrow(dds_topic_cft);
 
-  rmw_ret_t ret;
-  rcutils_ret_t rcutils_ret;
   int parameters_len;
   rcutils_allocator_t allocator = rcutils_get_default_allocator();
 
@@ -2247,6 +2245,15 @@ RMW_Connext_Subscriber::get_cft_expression_parameters(
     RMW_SET_ERROR_MSG("failed to duplicate string");
     return RMW_RET_BAD_ALLOC;
   }
+  auto scope_exit_filter_expression_delete =
+    rcpputils::make_scope_exit(
+    [filter_expression, allocator]()
+    {
+      if (*filter_expression) {
+        allocator.deallocate(*filter_expression, allocator.state);
+        *filter_expression = nullptr;
+      }
+    });
 
   // get parameters
   struct DDS_StringSeq parameters;
@@ -2254,45 +2261,41 @@ RMW_Connext_Subscriber::get_cft_expression_parameters(
     DDS_ContentFilteredTopic_get_expression_parameters(cft_topic, &parameters);
   if (DDS_RETCODE_OK != status) {
     RMW_SET_ERROR_MSG("failed to get expression parameters");
-    ret = RMW_RET_ERROR;
-    goto clean;
+    return RMW_RET_ERROR;
   }
+  auto scope_exit_parameters_delete =
+    rcpputils::make_scope_exit(
+    [&parameters]()
+    {
+      DDS_StringSeq_finalize(&parameters);
+    });
 
   parameters_len = DDS_StringSeq_get_length(&parameters);
-  rcutils_ret = rcutils_string_array_init(expression_parameters, parameters_len, &allocator);
+  rcutils_ret_t rcutils_ret = rcutils_string_array_init(expression_parameters, parameters_len, &allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
     RMW_SET_ERROR_MSG("failed to init string array for expression parameters");
-    ret = RMW_RET_ERROR;
-    goto clean_parameters;
+    return RMW_RET_ERROR;
   }
+  auto scope_exit_expression_parameters_delete =
+    rcpputils::make_scope_exit(
+    [expression_parameters]()
+    {
+      if (RCUTILS_RET_OK != rcutils_string_array_fini(expression_parameters)) {
+        RCUTILS_LOG_ERROR("Error while finalizing expression parameter due to another error");
+      }
+    });
   for (int i = 0; i < parameters_len; ++i) {
     char * parameter = rcutils_strdup(DDS_StringSeq_get(&parameters, i), allocator);
     if (!parameter) {
       RMW_SET_ERROR_MSG("failed to allocate memory for parameter");
-      ret = RMW_RET_BAD_ALLOC;
-      goto clean_parameters;
+      return RMW_RET_BAD_ALLOC;
     }
     expression_parameters->data[i] = parameter;
   }
 
-  DDS_StringSeq_finalize(&parameters);
+  scope_exit_filter_expression_delete.cancel();
+  scope_exit_expression_parameters_delete.cancel();
   return RMW_RET_OK;
-
-  // todo: use rcpputils::make_scope_exit
-clean_parameters:
-  DDS_StringSeq_finalize(&parameters);
-
-  if (RCUTILS_RET_OK != rcutils_string_array_fini(expression_parameters)) {
-    RCUTILS_LOG_ERROR("Error while finalizing expression parameter due to another error");
-  }
-
-clean:
-  if (*filter_expression) {
-    allocator.deallocate(*filter_expression, allocator.state);
-    *filter_expression = nullptr;
-  }
-
-  return ret;
 }
 
 rmw_ret_t
